@@ -128,16 +128,18 @@ public class TestInventory
 
         // Check for each item
         LinkedList.Node<ItemStack> it = slots.head;
-        assertThat(it.data.getItem().getName(), equalTo(testItems[0]));
+        assertThat(it.data.getItem(), equalTo(testItems[0]));
         assertThat(it.data.size(), equalTo(1));
 
         it = it.next;
-        assertThat(it.data.getItem().getName(), equalTo(testItems[1]));
+        assertThat(it.data.getItem(), equalTo(testItems[1]));
         assertThat(it.data.size(), equalTo(1));
 
         it = it.next;
-        assertThat(it.data.getItem().getName(), equalTo(testItems[0]));
-        assertThat(it.data.size(), equalTo(2));
+        assertThat(it.data.getItem(), equalTo(testItems[2]));
+        assertThat(it.data.size(), equalTo(1));
+
+        assertThat(it.next, is(nullValue()));
     }
 
     /**
@@ -172,16 +174,16 @@ public class TestInventory
         //----------------------------------------------------------------------
         LinkedList slots = extractSlotsFrom(aBag);
 
-        // Check that 3 ItemStacks were stored
+        // Check that 2 ItemStacks were stored
         assertThat(slots.currentSize, equalTo(2));
 
         // Check for each item
         LinkedList.Node<ItemStack> it = slots.head;
-        assertThat(it.data.getItem().getName(), equalTo(testItems[0]));
+        assertThat(it.data.getItem(), equalTo(testItems[0]));
         assertThat(it.data.size(), equalTo(1));
 
         it = it.next;
-        assertThat(it.data.getItem().getName(), equalTo(testItems[1]));
+        assertThat(it.data.getItem(), equalTo(testItems[1]));
         assertThat(it.data.size(), equalTo(2));
 
         assertThat(it.next, is(nullValue()));
@@ -219,16 +221,16 @@ public class TestInventory
         //----------------------------------------------------------------------
         LinkedList slots = extractSlotsFrom(aBag);
 
-        // Check that 3 ItemStacks were stored
+        // Check that 2 ItemStacks were stored
         assertThat(slots.currentSize, equalTo(2));
 
         // Check for each item
         LinkedList.Node<ItemStack> it = slots.head;
-        assertThat(it.data.getItem().getName(), equalTo(testItems[0]));
+        assertThat(it.data.getItem(), equalTo(testItems[0]));
         assertThat(it.data.size(), equalTo(1));
 
         it = it.next;
-        assertThat(it.data.getItem().getName(), equalTo(testItems[1]));
+        assertThat(it.data.getItem(), equalTo(testItems[1]));
         assertThat(it.data.size(), equalTo(1));
 
         assertThat(it.next, is(nullValue()));
@@ -260,6 +262,26 @@ public class TestInventory
         assertThat(aBag.utilizedSlots(), equalTo(2));
         assertThat(aBag.emptySlots(), equalTo(0));
         assertThat(aBag.totalSlots(), equalTo(2));
+
+        //----------------------------------------------------------------------
+        // Use reflection to check that containers.LinkedList
+        // was both used... and is in the correct state
+        //----------------------------------------------------------------------
+        LinkedList slots = extractSlotsFrom(aBag);
+
+        // Check that 2 ItemStacks were stored
+        assertThat(slots.currentSize, equalTo(2));
+
+        // Check for each item
+        LinkedList.Node<ItemStack> it = slots.head;
+        assertThat(it.data.getItem(), equalTo(testItems[0]));
+        assertThat(it.data.size(), equalTo(2));
+
+        it = it.next;
+        assertThat(it.data.getItem(), equalTo(testItems[1]));
+        assertThat(it.data.size(), equalTo(2));
+
+        assertThat(it.next, is(nullValue()));
     }
 
     @Test
