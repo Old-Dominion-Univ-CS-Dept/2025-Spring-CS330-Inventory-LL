@@ -10,9 +10,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
+import java.lang.reflect.Field;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Iterator;
+
+import containers.LinkedList;
 
 
 /**
@@ -39,6 +43,18 @@ import java.util.Iterator;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class TestInventory
 {
+    static LinkedList extractSlotsFrom(Inventory aBag)
+        throws IllegalAccessException, NoSuchFieldException
+    {
+        Class<?> clazz = Inventory.class;
+        Field fieldSlots = clazz.getDeclaredField("slots");
+        fieldSlots.setAccessible(true);
+
+        LinkedList bagSlots = (LinkedList) fieldSlots.get(aBag);
+
+        return bagSlots;
+    }
+
     private static final Inventory EMPTY_INVENTORY = new Inventory();
 
     private Item[] testItems;
@@ -76,11 +92,12 @@ public class TestInventory
     }
 
     /**
-     * Add ItemStacks to an Inventory without filling the Inventory or attempting
-     * to add duplicate Items
+     * Add ItemStacks to an Inventory without filling the Inventory or
+     * attempting to add duplicate Items
      */
     @Test
     public void testAddItemStackNoCheck()
+        throws IllegalAccessException, NoSuchFieldException
     {
         List<ItemStack> stacksToAdd = Arrays.asList(
             new ItemStack(testItems[0]),
@@ -99,14 +116,37 @@ public class TestInventory
         assertThat(aBag.utilizedSlots(), equalTo(3));
         assertThat(aBag.emptySlots(), equalTo(1));
         assertThat(aBag.totalSlots(), equalTo(4));
+
+        //----------------------------------------------------------------------
+        // Use reflection to check that containers.LinkedList
+        // was both used... and is in the correct state
+        //----------------------------------------------------------------------
+        LinkedList slots = extractSlotsFrom(aBag);
+
+        // Check that 3 ItemStacks were stored
+        assertThat(slots.currentSize, equalTo(3));
+
+        // Check for each item
+        LinkedList.Node<ItemStack> it = slots.head;
+        assertThat(it.data.getItem().getName(), equalTo(testItems[0]));
+        assertThat(it.data.size(), equalTo(1));
+
+        it = it.next;
+        assertThat(it.data.getItem().getName(), equalTo(testItems[1]));
+        assertThat(it.data.size(), equalTo(1));
+
+        it = it.next;
+        assertThat(it.data.getItem().getName(), equalTo(testItems[0]));
+        assertThat(it.data.size(), equalTo(2));
     }
 
     /**
-     * Add ItemStacks to an Inventory without filling the Inventory, but attempting
-     * to add duplicate Items
+     * Add ItemStacks to an Inventory without filling the Inventory, but
+     * attempting to add duplicate Items
      */
     @Test
     public void testAddItemWithDuplicateItems()
+        throws IllegalAccessException, NoSuchFieldException
     {
         List<ItemStack> stacksToAdd = Arrays.asList(
             new ItemStack(testItems[0]),
@@ -125,14 +165,35 @@ public class TestInventory
         assertThat(aBag.utilizedSlots(), equalTo(2));
         assertThat(aBag.emptySlots(), equalTo(2));
         assertThat(aBag.totalSlots(), equalTo(4));
+
+        //----------------------------------------------------------------------
+        // Use reflection to check that containers.LinkedList
+        // was both used... and is in the correct state
+        //----------------------------------------------------------------------
+        LinkedList slots = extractSlotsFrom(aBag);
+
+        // Check that 3 ItemStacks were stored
+        assertThat(slots.currentSize, equalTo(2));
+
+        // Check for each item
+        LinkedList.Node<ItemStack> it = slots.head;
+        assertThat(it.data.getItem().getName(), equalTo(testItems[0]));
+        assertThat(it.data.size(), equalTo(1));
+
+        it = it.next;
+        assertThat(it.data.getItem().getName(), equalTo(testItems[1]));
+        assertThat(it.data.size(), equalTo(2));
+
+        assertThat(it.next, is(nullValue()));
     }
 
     /**
-     * Add ItemStacks to an Inventory and fill it.
-     * Then try to add one more ItemStack that is stackable.
+     * Add ItemStacks to an Inventory and fill it. Then try to add one more
+     * ItemStack that is stackable.
      */
     @Test
     public void testAddItemAfterFullWithNonStackable()
+        throws IllegalAccessException, NoSuchFieldException
     {
         List<ItemStack> stacksToAdd = Arrays.asList(
             new ItemStack(testItems[0]),
@@ -151,6 +212,26 @@ public class TestInventory
         assertThat(aBag.utilizedSlots(), equalTo(2));
         assertThat(aBag.emptySlots(), equalTo(0));
         assertThat(aBag.totalSlots(), equalTo(2));
+
+        //----------------------------------------------------------------------
+        // Use reflection to check that containers.LinkedList
+        // was both used... and is in the correct state
+        //----------------------------------------------------------------------
+        LinkedList slots = extractSlotsFrom(aBag);
+
+        // Check that 3 ItemStacks were stored
+        assertThat(slots.currentSize, equalTo(2));
+
+        // Check for each item
+        LinkedList.Node<ItemStack> it = slots.head;
+        assertThat(it.data.getItem().getName(), equalTo(testItems[0]));
+        assertThat(it.data.size(), equalTo(1));
+
+        it = it.next;
+        assertThat(it.data.getItem().getName(), equalTo(testItems[1]));
+        assertThat(it.data.size(), equalTo(1));
+
+        assertThat(it.next, is(nullValue()));
     }
 
     /**
@@ -159,6 +240,7 @@ public class TestInventory
      */
     @Test
     public void testAddItemAfterFullWithStackable()
+        throws IllegalAccessException, NoSuchFieldException
     {
         List<ItemStack> stacksToAdd = Arrays.asList(
             new ItemStack(testItems[0]),
